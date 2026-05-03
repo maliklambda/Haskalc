@@ -1,19 +1,20 @@
 module Lexer where
 
-import Data.Char (isDigit, isSpace)
+import Data.Char (isDigit, isSpace, isAlpha)
 
 data Token
   = Num Int
   | Op Operator
+  | Func String
   | RParen
   | LParen
   deriving (Eq, Show)
 
-data Operator 
-  = Add 
-  | Mul 
+data Operator
+  = Add
+  | Mul
   | Sub -- Lexer stays "dumb" and parser handles negative expressions
-  | Div 
+  | Div
   deriving (Eq, Show)
 
 lexer :: String -> [Token]
@@ -25,14 +26,17 @@ lexer ('(' : cs) = LParen : lexer cs
 lexer (')' : cs) = RParen : lexer cs
 lexer ('-' : cs) = Op Sub : lexer cs
 lexer (c : cs)
-  | isSpace c = lexer cs
+  | isSpace c = lexer cs -- skip spaces
   | isDigit c =
       let (digits, rest) = span isDigit (c : cs)
-      in Num (read digits) : lexer rest
+       in Num (read digits) : lexer rest
+  | isAlpha c = 
+    let (name, rest) = span isAlpha (c:cs)
+    in Func name : lexer rest
 lexer (_ : cs) = error "Invalid Character"
 
 -- Parses multidigit (positive) number to one integer
 nextNum :: Char -> String -> (Int, String)
 nextNum c cs =
-      let (digits, rest) = span isDigit (c : cs)
-      in (read digits, cs)
+  let (digits, rest) = span isDigit (c : cs)
+   in (read digits, cs)
