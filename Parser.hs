@@ -57,6 +57,8 @@ led left (Op op) rest =
 
 parseExpr :: Int -> [Token] -> Either String (Expr, [Token])
 parseExpr _ [] = Left "Empty input"
+parseExpr _ [Func s] = Left $ "Simple function'"++s++"', call it with ()"
+parseExpr _ [Func s, LParen, RParen] = Right (FuncExpr s [], [])
 parseExpr minBP (t : ts) =
   let (left, rest) = nud t ts
    in Right (parseExprInner minBP left rest)

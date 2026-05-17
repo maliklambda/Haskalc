@@ -2,6 +2,7 @@ module Evaluator where
 
 import Lexer
 import Parser
+import Command (CMD (EXIT, HELP, CLEAR))
 
 -- run combines all steps to compute the result
 run :: String -> EvalResult
@@ -12,6 +13,7 @@ data EvalResult where
   EvalNum :: Double -> EvalResult
   EvalBool :: Bool -> EvalResult
   EvalError :: String -> EvalResult
+  EvalCmd :: CMD -> EvalResult
   deriving (Show, Eq)
 
 eval :: Either String Expr -> EvalResult
@@ -20,6 +22,9 @@ eval (Right (IntExpr n)) = EvalNum (fromIntegral n)
 eval (Right (ParenExpr p)) = eval (Right p)
 eval (Right (FuncExpr fname args))
   | fname == "SQRT" = fnSQRT args
+  | fname == "exit" = EvalCmd EXIT
+  | fname == "help" = EvalCmd HELP
+  | fname == "clear" = EvalCmd CLEAR
   | otherwise = EvalError $ "Unsupported function: " ++ fname
 -- Addition
 eval (Right( BinExpr lhs Add rhs)) =
@@ -44,4 +49,4 @@ eval (Right (BinExpr lhs Div rhs)) =
 
 fnSQRT :: [Expr] -> EvalResult
 fnSQRT [ParenExpr (IntExpr val)] = EvalNum (sqrt (fromIntegral val))
-fnSQRT _ = error "Invalid arguments for function SQRT"
+fnSQRT _ = EvalError "Invalid arguments for function SQRT"

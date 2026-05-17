@@ -23,5 +23,7 @@ loop :: String -> [String] -> IO ()
 loop prompt args = do
   putStr prompt
   input <- getLine
-  putStrLn $ "result: " ++ show (run input)
+  putStrLn $ "Lexer result: " ++ show (lexer input)
+  putStrLn $ "Parser result: " ++ show (parse (lexer input))
+  putStrLn $ "Eval result: " ++ show (run input)
   if input == "exit" then return () else loop prompt args
