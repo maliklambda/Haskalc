@@ -9,9 +9,11 @@ import Lexer
 import Parser
 import System.Environment
 import Test
+import System.IO
 
 main :: IO ()
 main = do
+  hSetBuffering stdin LineBuffering
   args <- getArgs
   -- if args.first == "--test": runTests
   loop "> " []
@@ -19,7 +21,7 @@ main = do
 
 loop :: String -> [String] -> IO ()
 loop prompt args = do
-  liftIO $ putStr prompt
-  input <- liftIO getLine
-  liftIO $ putStrLn $ "result: " ++ show (run input)
+  putStr prompt
+  input <- getLine
+  putStrLn $ "result: " ++ show (run input)
   if input == "exit" then return () else loop prompt args

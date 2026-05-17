@@ -2,10 +2,11 @@ module Parser where
 
 import Data.Binary.Get (remaining)
 import Lexer
+import Data.Bifunctor (second)
 
-parse :: [Token] -> Expr
+parse :: [Token] -> Either String Expr
 -- use fst function to remove empty list of tokens after parsing finishes
-parse tokens = fst (parseExpr 0 tokens)
+parse tokens = second fst(parseExpr 0 tokens)
 
 data Expr
   = IntExpr Int
@@ -30,18 +31,18 @@ getBPOp op
 nud :: Token -> [Token] -> (Expr, [Token])
 nud (Num n) rest = (IntExpr n, rest)
 nud LParen rest =
-  let (innerExpr, afterInner) = parseExpr (getBP LParen) rest
+  let Right (innerExpr, afterInner) = parseExpr (getBP LParen) rest
    in case afterInner of
         (RParen : remaining) -> (ParenExpr innerExpr, remaining)
         _ -> error $ "Unclosed parenthesis" ++ show afterInner ++ " vs. " ++ show innerExpr
 nud (Op Sub) rest =
   -- case: '-' as prefix -> high binding power
   -- use Mul as binding power -> "-x*5" binds as (-x)*5
-  let (expr, remaining) = parseExpr (getBPOp Mul) rest
+  let Right (expr, remaining) = parseExpr (getBPOp Mul) rest
    in -- in (BinExpr (IntExpr (-1)) Mul expr, remaining)
       (BinExpr (IntExpr (-1)) Mul expr, remaining)
 nud (Func fname) rest = 
-  let (pExpr, afterExpr) = parseExpr (getBP LParen) rest
+  let Right (pExpr, afterExpr) = parseExpr (getBP LParen) rest
   in case pExpr of 
     ParenExpr p -> (FuncExpr fname [pExpr], afterExpr)
     _ -> error "Invalid function expression"
@@ -51,14 +52,14 @@ nud t _ = error $ "Unknown function name" ++ show t
 -- left denotation
 led :: Expr -> Token -> [Token] -> (Expr, [Token])
 led left (Op op) rest =
-  let (right, remaining) = parseExpr (getBPOp op) rest
+  let Right (right, remaining) = parseExpr (getBPOp op) rest
    in (BinExpr left op right, remaining)
 
-parseExpr :: Int -> [Token] -> (Expr, [Token])
-parseExpr _ [] = error "Empty input"
+parseExpr :: Int -> [Token] -> Either String (Expr, [Token])
+parseExpr _ [] = Left "Empty input"
 parseExpr minBP (t : ts) =
   let (left, rest) = nud t ts
-   in parseExprInner minBP left rest
+   in Right (parseExprInner minBP left rest)
 
 parseExprInner :: Int -> Expr -> [Token] -> (Expr, [Token])
 parseExprInner minBP left [] = (left, [])
