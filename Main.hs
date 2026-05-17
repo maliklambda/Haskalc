@@ -25,5 +25,10 @@ loop prompt args = do
   input <- getLine
   putStrLn $ "Lexer result: " ++ show (lexer input)
   putStrLn $ "Parser result: " ++ show (parse (lexer input))
-  putStrLn $ "Eval result: " ++ show (run input)
+  let result = run input
+  case result of 
+    EvalCmd cmd -> putStrLn $ "Executing command: " ++ show cmd
+    EvalNum n -> putStrLn $ "Result (numeric): " ++ show n
+    EvalBool b -> putStrLn $ "Result (boolean): " ++ show b
+    EvalError err -> putStrLn $ "Error: " ++ err
   if input == "exit" then return () else loop prompt args

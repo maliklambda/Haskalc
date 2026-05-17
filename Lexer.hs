@@ -15,6 +15,7 @@ data Operator
   | Mul
   | Sub -- Lexer stays "dumb" and parser handles negative expressions
   | Div
+  | Equal -- A == B
   deriving (Eq, Show)
 
 lexer :: String -> [Token]
@@ -25,6 +26,7 @@ lexer ('/' : cs) = Op Div : lexer cs
 lexer ('(' : cs) = LParen : lexer cs
 lexer (')' : cs) = RParen : lexer cs
 lexer ('-' : cs) = Op Sub : lexer cs
+lexer ('=': '=' : cs) = Op Equal: lexer cs
 lexer (c : cs)
   | isSpace c = lexer cs -- skip spaces
   | isDigit c =
@@ -33,7 +35,7 @@ lexer (c : cs)
   | isAlpha c = 
     let (name, rest) = span isAlpha (c:cs)
     in Func name : lexer rest
-lexer (_ : cs) = error "Invalid Character"
+lexer (invalid_char : cs) = error $ "Invalid Character: '" ++ show invalid_char ++ "'"
 
 -- Parses multidigit (positive) number to one integer
 nextNum :: Char -> String -> (Int, String)

@@ -22,10 +22,11 @@ getBP _ = 0
 
 getBPOp :: Operator -> Int
 getBPOp op
-  | op == Add = 10
-  | op == Sub = 10 -- only used for infix
-  | op == Mul = 20
-  | op == Div = 20
+  | op == Equal = 10 -- lowest BP
+  | op == Add = 20
+  | op == Sub = 20 -- only used for infix
+  | op == Mul = 30
+  | op == Div = 30
 
 -- null denotation
 nud :: Token -> [Token] -> (Expr, [Token])

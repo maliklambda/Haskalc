@@ -25,7 +25,12 @@ eval (Right (FuncExpr fname args))
   | fname == "exit" = EvalCmd EXIT
   | fname == "help" = EvalCmd HELP
   | fname == "clear" = EvalCmd CLEAR
-  | otherwise = EvalError $ "Unsupported function: " ++ fname
+  | otherwise = EvalError $ "Unsupported function '" ++ fname ++ "'"
+-- Equality
+eval (Right (BinExpr lhs Equal rhs)) =
+  case (eval (Right lhs), eval (Right rhs)) of
+    (EvalNum l, EvalNum r) -> EvalBool (l == r)
+    _ -> error $ "Unsupported Equality operation between " ++ show lhs ++ " and " ++ show rhs
 -- Addition
 eval (Right( BinExpr lhs Add rhs)) =
   case (eval (Right lhs), eval (Right rhs)) of
