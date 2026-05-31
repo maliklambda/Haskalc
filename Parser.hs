@@ -48,7 +48,7 @@ nud (Func fname) rest =
     ParenExpr p -> (FuncExpr fname [pExpr], afterExpr)
     _ -> error "Invalid function expression"
 
-nud t _ = error $ "Unknown function name" ++ show t
+nud t rest = error $ "Unknown function name" ++ show t
 
 -- left denotation
 led :: Expr -> Token -> [Token] -> (Expr, [Token])
